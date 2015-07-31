@@ -1,0 +1,23 @@
+[publish]
+from = 
+to = 
+smtp_server = 
+title = 
+date_format = 
+footer = 
+
+[calendar]
+url = 
+date_format =
+days_to_show = 
+
+[twitter]
+consumer_key =
+consumer_secret =
+access_token_key = 
+access_token_secret = 
+handle = 
+bookmark_file = 
+
+[quotes]
+file = 
