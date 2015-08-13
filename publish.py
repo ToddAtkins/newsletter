@@ -4,16 +4,16 @@ from calendar import get_events, format_events
 import ConfigParser
 import datetime
 from email.mime.text import MIMEText
+import os
 import re
 import smtplib
-import sys
 import twit
 import twitter
 from quote import random_quote
 
 def main():
     config = ConfigParser.ConfigParser()
-    config.readfp(open(sys.path.expanduser('~/.newsletter.ini')))
+    config.readfp(open(os.path.expanduser('~/.newsletter.ini')))
     calcfg = dict(config.items('calendar'))
     pubcfg = dict(config.items('publish'))
     quotcfg = dict(config.items('quotes'))
@@ -40,7 +40,7 @@ def main():
                      access_token_key=twitcfg['access_token_key'],
                      access_token_secret=twitcfg['access_token_secret'])
     statuses = twit.get_statuses(api, user=twitcfg['handle'])
-    twitter_bookmark = twit.get_bookmark(twitcfg['bookmark_file'])
+    twitter_bookmark = twit.get_bookmark(os.path.expanduser(twitcfg['bookmark_file']))
     
     sid = 0
     if len(statuses):
@@ -76,7 +76,7 @@ def main():
             print 'The latest Twitter status ID published is {}'.format(sid)
             ans = raw_input('Update ID in {}? '.format(twitcfg['bookmark_file']))
             if ans == 'yes':
-                twit.save_bookmark(twitcfg['bookmark_file'], sid)
+                twit.save_bookmark(os.path.expanduser(twitcfg['bookmark_file']), sid)
                 
 if __name__ == '__main__':
     main()

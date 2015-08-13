@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+import ConfigParser
+import os
 import twitter
 import time
-import sys
 import pprint as pp
 
 def login(consumer_key, consumer_secret, access_token_key, access_token_secret):
@@ -12,24 +13,31 @@ def login(consumer_key, consumer_secret, access_token_key, access_token_secret):
     return(api)
 
 def get_bookmark(file):
-    b = 0
-    with open(file, 'rt') as f:
-        b = int(f.readline())
-        f.close()
-    return b
+    bookmark = 0
+    if os.path.exists(file):
+        with open(file, 'rt') as f:
+            bookmark = int(f.readline())
+            f.close()
+    return bookmark
 
 def get_statuses(api, user):
     statuses = api.GetUserTimeline(user)
     return statuses
 
-def save_bookmark(file, b):
+def save_bookmark(file, bookmark):
     with open(file, 'wt') as f:
-        f.write(str(b))
+        f.write(str(bookmark))
         f.close()
 
 def main():
-    api = get_api()
-    statuses = get_statuses(api, user='SB_Wino')
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(os.path.expanduser('~/.newsletter.ini')))
+    twitcfg = dict(config.items('twitter'))
+    api = login(consumer_key=twitcfg['consumer_key'],
+                consumer_secret=twitcfg['consumer_secret'],
+                access_token_key=twitcfg['access_token_key'],
+                access_token_secret=twitcfg['access_token_secret'])
+    statuses = get_statuses(api, user=twitcfg['handle'])
     for s in statuses:
         print(s.id)
         print(s.created_at)
@@ -37,4 +45,4 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
+
