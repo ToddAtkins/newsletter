@@ -6,13 +6,14 @@ import datetime
 from email.mime.text import MIMEText
 import re
 import smtplib
+import sys
 import twit
 import twitter
 from quote import random_quote
 
 def main():
     config = ConfigParser.ConfigParser()
-    config.readfp(open('newsletter.ini'))
+    config.readfp(open(sys.path.expanduser('~/.newsletter.ini')))
     calcfg = dict(config.items('calendar'))
     pubcfg = dict(config.items('publish'))
     quotcfg = dict(config.items('quotes'))
