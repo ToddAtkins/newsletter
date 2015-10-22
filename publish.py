@@ -12,8 +12,12 @@ import twitter
 from quote import random_quote
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--conf', type=str, metavar='newsletter_config_filename', default=os.path.expanduser('~/.newsletter.ini'))
+    args = parser.parse_args()
+     
     config = ConfigParser.ConfigParser()
-    config.readfp(open(os.path.expanduser('~/.newsletter.ini')))
+    config.readfp(open(args.conf))
     calcfg = dict(config.items('calendar'))
     pubcfg = dict(config.items('publish'))
     quotcfg = dict(config.items('quotes'))
@@ -22,7 +26,7 @@ def main():
     separator = '+'*24
     subject = '{title} : {date}'.format(title=pubcfg['title'], 
                                         date=datetime.date.today().strftime(pubcfg['date_format']))
-    quote = random_quote(quotcfg['file'])
+    quote = random_quote(os.path.expanduser(quotcfg['file']))
     footer = pubcfg['footer']
     
     print('Subject: %s' % subject)
