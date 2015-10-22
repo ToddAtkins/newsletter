@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-#import pkgutil
-#quotes = pkgutil.get_data(__package__, 'winequote.dat')
 
 import random
 import re
