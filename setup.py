@@ -3,30 +3,21 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'newsletter',
-    version = '1.0.0',
+    version = '1.0.1',
     description = 'simple newsletter generator',
-    packages = findpackages(include=['publish']),
+    packages = find_packages(include=['publish']),
     install_requires = [
-        'argparse',
-        'ConfigParser',
-        'datetime',
-        'email'
         'icalendar',
-        'json',
-        'operator',
         'pytz',
-        'random',
-        'smtplib',
-        'twitter',
+        'python-twitter',
         'tzlocal',
-        'urllib',
     ],
     namespace_packages = ['publish'],
     entry_points = {
         'console_scripts': [
-            'calendar = publish.calendar:main',
+            'mycalendar = publish.mycalendar:main',
             'quote = publish.quote:main',
-            'tweets = publish.tweets:main',
+            'mytweets = publish.mytwitter:main',
         ],
     },
     author = 'E. Todd Atkins',

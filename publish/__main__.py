@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 import argparse
-from calendar import get_events, format_events
+from mycalendar import get_events, format_events
 import ConfigParser
 import datetime
 from email.mime.text import MIMEText
 import os
 import re
 import smtplib
-import twit
+import mytwitter
 import twitter
 from quote import random_quote
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--conf', type=str, metavar='newsletter_config_filename', default=os.path.expanduser('~/.newsletter.ini'))
+    parser.add_argument('--conf', '-c', type=str, metavar='newsletter_config_filename', default=os.path.expanduser('~/.newsletter.ini'))
+    parser.add_argument('--ignore-tweets', action="store_true")
+    parser.add_argument('--no-tls', action='store_true', default=False)
     args = parser.parse_args()
      
     config = ConfigParser.ConfigParser()
@@ -29,8 +31,6 @@ def main():
     quote = random_quote(os.path.expanduser(quotcfg['file']))
     footer = pubcfg['footer']
     
-    print('Subject: %s' % subject)
-
     # build the newsletter
     newsletter = separator + '\n'
     newsletter += 'Happenings\n'
@@ -39,48 +39,61 @@ def main():
                                 separator=separator,
                                 date_format=calcfg['date_format'])
     
-    api = twit.login(consumer_key=twitcfg['consumer_key'],
-                     consumer_secret=twitcfg['consumer_secret'],
-                     access_token_key=twitcfg['access_token_key'],
-                     access_token_secret=twitcfg['access_token_secret'])
-    statuses = twit.get_statuses(api, user=twitcfg['handle'])
-    twitter_bookmark = twit.get_bookmark(os.path.expanduser(twitcfg['bookmark_file']))
+    if args.no_tls:
+        mailer = smtplib.SMTP(pubcfg['smtp_server'])
+    else:
+        print(pubcfg['smtp_server'])
+        if 'smtp_port' in pubcfg:
+            mailer = smtplib.SMTP(pubcfg['smtp_server'], pubcfg['smtp_port'])
+        else:
+            mailer = smtplib.SMTP(pubcfg['smtp_server'], 587)
+        mailer.ehlo()
+        mailer.starttls()
+        if 'smtp_user' not in pubcfg:
+            pubcfg['smtp_user'] = raw_input('username for %s smtp server? ' % pubcfg['smtp_server'])
+        if 'smtp_password' not in pubcfg:
+            pubcfg['smtp_password'] = getpass('password for %s smtp server? ' % pubcfg['smtp_server'])
+        mailer.login(pubcfg['smtp_user'], pubcfg['smtp_password'])
+
+    if not args.ignore_tweets:
+        api = mytwitter.login(consumer_key=twitcfg['consumer_key'],
+                              consumer_secret=twitcfg['consumer_secret'],
+                              access_token_key=twitcfg['access_token_key'],
+                              access_token_secret=twitcfg['access_token_secret'])
+        twitter_bookmark = mytwitter.get_bookmark(os.path.expanduser(twitcfg['bookmark_file']))
+        statuses = api.GetUserTimeline(since_id=twitter_bookmark)
     
-    sid = 0
-    if len(statuses):
-        newsletter += 'News and other Nonsense' + '\n'
-        newsletter += separator + '\n\n'
-        for s in statuses:
-            if s.id > twitter_bookmark:
+        sid = 0
+        if len(statuses):
+            newsletter += 'News and other Nonsense' + '\n'
+            newsletter += separator + '\n\n'
+            for s in statuses:
                 if sid == 0:
                     sid = s.id
                 txt = re.sub(r' #winoinfo.*', '', s.text)
                 txt = re.sub(r'#', '', txt)
                 newsletter += txt.encode('utf-8') + '\n\n'
             
-        newsletter += separator + '\n'
+    newsletter += separator + '\n'
     newsletter += "{0}\n- {1}\n".format(quote['quote'], quote['author'])
     newsletter += separator + '\n\n'
     newsletter += footer + '\n'
-
-    print newsletter
     
+    msg = MIMEText(newsletter)
+    msg['Subject'] = subject
+    msg['From'] = pubcfg['from']
+    msg['To'] = pubcfg['to']
+    print msg.as_string()
     ans = raw_input('Send out this newsletter? ')
     if ans == 'yes':
-        msg = MIMEText(newsletter)
-        msg['Subject'] = subject
-        msg['From'] = pubcfg['from']
-        msg['To'] = pubcfg['to']
-        
-        s = smtplib.SMTP(pubcfg['smtp_server'])
-        s.sendmail(pubcfg['from'], [pubcfg['to']], msg.as_string())
-        s.quit()
+        mailer.sendmail(pubcfg['from'], [pubcfg['to']], msg.as_string())
+        mailer.quit()
         
         if sid:
             print 'The latest Twitter status ID published is {}'.format(sid)
             ans = raw_input('Update ID in {}? '.format(twitcfg['bookmark_file']))
             if ans == 'yes':
-                twit.save_bookmark(os.path.expanduser(twitcfg['bookmark_file']), sid)
+                mytwitter.save_bookmark(os.path.expanduser(twitcfg['bookmark_file']), sid)
                 
 if __name__ == '__main__':
     main()

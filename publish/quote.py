@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import argparse
 import random
 import re
 import json
@@ -31,5 +31,11 @@ def print_random_quote(file, width=0):
         import textwrap
         print("{0}\n-{1}".format(textwrap.fill(q['quote'], width), q['author']))
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', type=str, default=os.path.expanduser('~/winequote.txt'))
+    args = parser.parse_args()
+    print_random_quote(file=args.file)
+
 if __name__ == "__main__":
-    print_random_quote(file='winequote.txt')
+    main()
