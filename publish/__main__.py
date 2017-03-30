@@ -70,7 +70,9 @@ def main():
             for s in statuses:
                 if sid == 0:
                     sid = s.id
-                txt = re.sub(r' #winoinfo.*', '', s.text)
+                txt = re.sub(r'^RT[^:]*:\s*', '', s.text)
+                txt = re.sub(r' #winoinfo.*', '', txt)
+                txt = re.sub(r' #winoinfo.*', '', txt)
                 txt = re.sub(r'#', '', txt)
                 newsletter += txt.encode('utf-8') + '\n\n'
             
@@ -90,6 +92,7 @@ def main():
         mailer.quit()
         
         if sid:
+            print 'The first Twitter status ID used is {}'.format(twitter_bookmark)
             print 'The latest Twitter status ID published is {}'.format(sid)
             ans = raw_input('Update ID in {}? '.format(twitcfg['bookmark_file']))
             if ans == 'yes':
