@@ -3,13 +3,14 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'newsletter',
-    version = '1.0.1',
+    version = '1.0.2',
     description = 'simple newsletter generator',
     packages = find_packages(include=['publish']),
     install_requires = [
         'icalendar',
         'pytz',
         'python-twitter',
+	'requests',
         'tzlocal',
     ],
     namespace_packages = ['publish'],
