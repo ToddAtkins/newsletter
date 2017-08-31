@@ -16,6 +16,7 @@ def main():
     parser.add_argument('--conf', '-c', type=str, metavar='newsletter_config_filename', default=os.path.expanduser('~/.newsletter.ini'))
     parser.add_argument('--ignore-tweets', action="store_true")
     parser.add_argument('--no-tls', action='store_true', default=False)
+    parser.add_argument('--verbose', '-v', action='store_true', default=False)
     args = parser.parse_args()
      
     config = ConfigParser.ConfigParser()
@@ -42,7 +43,8 @@ def main():
     if args.no_tls:
         mailer = smtplib.SMTP(pubcfg['smtp_server'])
     else:
-        print(pubcfg['smtp_server'])
+        if args.verbose:
+            print(pubcfg['smtp_server'])
         if 'smtp_port' in pubcfg:
             mailer = smtplib.SMTP(pubcfg['smtp_server'], pubcfg['smtp_port'])
         else:

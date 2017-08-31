@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'newsletter',
-    version = '1.0.2',
+    version = '1.1.0',
     description = 'simple newsletter generator',
     packages = find_packages(include=['publish']),
     install_requires = [
@@ -16,6 +16,7 @@ setup(
     namespace_packages = ['publish'],
     entry_points = {
         'console_scripts': [
+            'publish = publish.__main__:main',
             'mycalendar = publish.mycalendar:main',
             'quote = publish.quote:main',
             'mytweets = publish.mytwitter:main',
