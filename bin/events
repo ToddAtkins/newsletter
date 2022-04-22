@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+__author__ = 'Todd Atkins <sbwino@gmail.com>'
+import runpy
+runpy.run_module('publish', run_name='pubcalendar')
