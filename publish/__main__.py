@@ -9,7 +9,6 @@ import smtplib
 import publish.pubcalendar
 import publish.pubtwitter
 import publish.pubquote
-#import twitter
 from pprint import pprint
 
 def main():
